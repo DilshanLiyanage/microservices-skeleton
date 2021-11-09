@@ -1,5 +1,6 @@
 package com.tharusha.vaccinationcenterservice.services;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.tharusha.vaccinationcenterservice.models.Citizen;
 import com.tharusha.vaccinationcenterservice.models.VaccinatedCitizens;
 import com.tharusha.vaccinationcenterservice.models.VaccinationCenter;
@@ -24,6 +25,7 @@ public class VaccinationCenterService {
         return vaccinationCenterRepo.save(vaccinationCenter);
     }
 
+    @HystrixCommand(fallbackMethod = "handleVccinatedCitizensDown")
     public VaccinatedCitizens fetchVccinatedCitizens(Integer id){
         VaccinatedCitizens vaccinatedCitizens = new VaccinatedCitizens();
 
@@ -35,4 +37,14 @@ public class VaccinationCenterService {
 
         return vaccinatedCitizens;
     }
+
+    public VaccinatedCitizens handleVccinatedCitizensDown(Integer id) {
+        VaccinatedCitizens vaccinatedCitizens = new VaccinatedCitizens();
+
+        VaccinationCenter vaccinationCenter = vaccinationCenterRepo.findById(id).get();
+        vaccinatedCitizens.setVaccinationCenter(vaccinationCenter);
+
+        return vaccinatedCitizens;
+    }
+
 }
